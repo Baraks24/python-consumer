@@ -2,6 +2,7 @@ from kafka import KafkaConsumer
 import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from elasticsearch import Elasticsearch
 
 DB = "barak-db"
 UPDATE = 'u'
@@ -11,6 +12,8 @@ CREATE = 'c'
 client = MongoClient('mongodb://10.0.0.42,10.0.0.43,10.0.0.44/?replicaSet=mongo-azure')
 db_input = client[DB]
 users = db_input.users
+es = Elasticsearch(['localhost', 'otherhost'],http_auth=('user', 'secret'),scheme="https",port=443,)
+
 
 
 class OpHandler:
