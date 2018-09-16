@@ -9,7 +9,9 @@ TASKS_INDEX = "tasks"
 #TODO: actually write something useful
 
 def create_doc(index,doc):
-    es.create(index=index,id=doc["id"],body=doc,doc_type=index)
+    id = doc["_id"]
+    doc.pop("_id")
+    es.create(index=index,id=id,body=doc,doc_type=index)
     return
 
 def update_doc(index,doc):
@@ -18,7 +20,7 @@ def update_doc(index,doc):
 def delete_doc(index,id):
     return
 
-create_doc(index=USERS_INDEX,doc={"id":"234","foo":"foo"})
+create_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo"})
 
 #create indices
 # es.indices.create(index=USERS_INDEX)
