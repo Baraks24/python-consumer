@@ -13,7 +13,7 @@ def create_doc(index,doc):
 def update_doc(index,doc):
     id = doc["_id"]
     doc.pop("_id")
-    doc["foo"] = "despacito 2"
+    #doc["foo"] = "despacito 2"
     es.update(index=index,id=id,body={"doc":doc},doc_type=index)
     return
 
