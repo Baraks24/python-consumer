@@ -1,10 +1,6 @@
 from elasticsearch import Elasticsearch
-es = Elasticsearch()#(['localhost', 'otherhost'],http_auth=('user', 'secret'),scheme="https",port=443,)
-
-USERS_INDEX = "users"
-PROJECTS_INDEX = "projects"
-DISCUSSIONS_INDEX = "discussions"
-TASKS_INDEX = "tasks"
+from config import ELASTICSEARCH_HOSTS,USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX
+es = Elasticsearch(ELASTICSEARCH_HOSTS)
 
 #TODO: actually write something useful
 
@@ -15,12 +11,19 @@ def create_doc(index,doc):
     return
 
 def update_doc(index,doc):
+    id = doc["_id"]
+    doc.pop("_id")
+    doc["foo"] = "despacito 2"
+    es.update(index=index,id=id,body={"doc":doc},doc_type=index)
     return
 
 def delete_doc(index,id):
+    es.delete(index=index,id=id,doc_type=index)
     return
 
-create_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo"})
+#create_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo"})
+#update_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo"})
+#delete_doc(index=TASKS_INDEX,id=456)
 
 #create indices
 # es.indices.create(index=USERS_INDEX)

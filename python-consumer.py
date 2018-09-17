@@ -3,29 +3,21 @@ import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from op_handler import OpHandler
+from config import DB,MONGO_URI,TOPICS
 
 
 from elasticsearch_wrapper import create_doc,delete_doc,update_doc
 from mongo_aggregations import projects_aggregation,users_aggregation,discussions_aggregation,tasks_aggregation
 
-DB = "barak-db"
 UPDATE = 'u'
 DELETE = 'd'
 CREATE = 'c'
 
-client = MongoClient('mongodb://10.0.0.42,10.0.0.43,10.0.0.44/?replicaSet=mongo-azure')
-db_input = client[DB]
-tasks = db_input.tasks
-users = db_input.users
-projects = db_input.projects
-task_archive = db_input["task_archive"]
-
-ordertasks = db_input.ordertasks
-discussions = db_input.discussions
-updates = db_input.updates
-update_archive = db_input["update_archive"]
-
-
+ops={
+'c':'create',
+'d':'delete',
+'u':'update'
+}
 
 """
 returns tuple (op,collection,Id)
@@ -42,7 +34,7 @@ def get_params_from_message(msg):
             id = json.loads(key['payload']['_id'])['_id']['$oid']
         else:
             id = key['payload']['_id']   
-        return (op,collection,id)
+        return (ops[op],collection,id)
     else:
         return 'Junk message'
 
@@ -56,12 +48,12 @@ def opHandler(op_collection_userId_tuple):
 
 
 def main():
-    consumer = KafkaConsumer('barak.barak-db.users',value_deserializer=lambda m: json.loads(m.decode('utf-8')))
+    consumer = KafkaConsumer(*TOPICS,value_deserializer=lambda m: json.loads(m.decode('utf-8')))
     for msg in consumer:
         op_collection_userId_tuple = get_params_from_message(msg) 
         print(op_collection_userId_tuple)
         print('\n')
-        #print(opHandler(op_collection_userId_tuple))
+        opHandler(op_collection_userId_tuple)
 
 
 if __name__ == "__main__":

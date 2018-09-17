@@ -1,10 +1,6 @@
 from mongo_aggregations import projects_aggregation,users_aggregation,discussions_aggregation,tasks_aggregation
 from elasticsearch_wrapper import create_doc,delete_doc,update_doc
-
-USERS_INDEX = "users"
-PROJECTS_INDEX = "projects"
-DISCUSSIONS_INDEX = "discussions"
-TASKS_INDEX = "tasks"
+from config import USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX
 
 
 class OpHandler:
@@ -13,7 +9,7 @@ class OpHandler:
         #TODO run user aggregation pipeline and write to elastic
         #run aggregation
         agg_res = users_aggregation(id)
-        print(agg_res)
+        print(list(agg_res))
         #write res to elastic
         create_doc(USERS_INDEX,*agg_res) # * -spread operator
         return
@@ -42,9 +38,9 @@ class OpHandler:
     def create_tasks(id):
         #run aggregation
         agg_res = tasks_aggregation(id)
+        print(list(agg_res))
         #write aggregation to elastic
         create_doc(TASKS_INDEX,*agg_res)
-        #TODO simply run aggregation and write to elastic
         return
 
     @staticmethod
@@ -61,6 +57,7 @@ class OpHandler:
     def create_projects(id):
         #run aggregation
         agg_res = projects_aggregation(id)
+        print(list(agg_res))
         #write aggregation to elastic
         create_doc(PROJECTS_INDEX,*agg_res)
         #TODO
@@ -81,6 +78,7 @@ class OpHandler:
         #TODO
         #run aggregation
         agg_res = discussions_aggregation(id)
+        print(list(agg_res))
         #write aggregation to elastic
         create_doc(DISCUSSIONS_INDEX,*agg_res)
         return

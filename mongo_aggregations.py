@@ -2,13 +2,13 @@ import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from functools import reduce
+from config import DB,MONGO_URI
 
-DB = "barak-db"
 UPDATE = 'u'
 DELETE = 'd'
 CREATE = 'c'
 
-client = MongoClient('mongodb://10.0.0.42,10.0.0.43,10.0.0.44/?replicaSet=mongo-azure')
+client = MongoClient(MONGO_URI)
 db_input = client[DB]
 tasks = db_input.tasks
 users = db_input.users
