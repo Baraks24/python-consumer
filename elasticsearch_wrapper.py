@@ -1,13 +1,15 @@
 from elasticsearch import Elasticsearch
 from config import ELASTICSEARCH_HOSTS,USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX
-es = Elasticsearch(ELASTICSEARCH_HOSTS)
+from JSONSerializer import JSONSerializer
+
+es = Elasticsearch(ELASTICSEARCH_HOSTS,serializer = JSONSerializer())
 
 #TODO: actually write something useful
 
 def create_doc(index,doc):
     id = doc["_id"]
     doc.pop("_id")
-    es.create(index=index,id=id,body=doc,doc_type=index)
+    es.create(index=index,id=id,body=doc,doc_type=index,ignore=[400, 404,409])
     return
 
 def update_doc(index,doc):

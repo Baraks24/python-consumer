@@ -20,7 +20,6 @@ discussions = db_input.discussions
 updates = db_input.updates
 update_archive = db_input["update_archive"]
 
-
 """
 takes array of arrays and reduces them into a single array
 """
@@ -28,6 +27,9 @@ aoa2a = lambda aoa:list(reduce(lambda mem,a:mem+a,aoa,[]))
 
 def match_stage(id):
     return [{"$match":{"_id":ObjectId(id)}}]
+
+def convert_id2string_stage():
+    return [{"$addFields":{"_id":{"$convert":{"input": "$_id","to": "string"}}}}]
 
 def populate_creator_stage():
     return [
@@ -38,7 +40,10 @@ def populate_creator_stage():
         "as":"creator"}
     },
     {
-        "$unwind":"$creator"
+        "$unwind":{
+            "path": "$creator",
+            "preserveNullAndEmptyArrays": True
+        }
     },
     ]
 
@@ -51,7 +56,10 @@ def populate_assign_stage():
         "as":"assign"}
     },
     {
-        "$unwind":"$assign"
+        "$unwind":{
+            "path": "$assign",
+            "preserveNullAndEmptyArrays": True
+        }
     },
     ]
 
@@ -135,6 +143,79 @@ def tasks_filter_stage():
             },
         }
     }
+    ]
+
+def discussions_filter_stage():
+    return [
+        {
+            "$project":{
+                '_id':1,
+                'title':1,
+                'location':1,
+                'updated':1,
+                'creator':1,
+                #'subTasks':1, ? relevant
+                #'sources':1, ?relevant
+                'discussions':1,
+                #'permissions':1,
+                'watchers':1,
+                'status':1,
+                'tags':1,
+                'created':1,
+                '__v':1,
+                #'circles':1, ? relevant
+                'assign':1, 
+                'description':1,
+                'due':1,
+                "comments":{
+                    "$filter":{
+                        "input":"$updates",
+                        "as":"update",
+                        "cond":{"$eq":["$$update.type","comment"]}
+                    }
+                },
+                "statusUpdates":{
+                    "$filter":{
+                        "input":"$updates",
+                        "as":"update",
+                        "cond":{"$eq":["$$update.type","updateStatus"]}
+                    }
+                },
+            "assignUpdates":{   
+                "$filter":{
+                    "input":"$updates",
+                    "as":"update",
+                    "cond":{"$or":[
+                        {"$eq":["$$update.type","assignNew"]},
+                        {"$eq":["$$update.type","assign"]},
+                    ]
+                    }
+                } 
+            },
+            #permissions unpopulated
+            "editors":{
+                "$filter":{
+                    "input":"$permissions",
+                    "as":"permission",
+                    "cond":{"$eq":["$$permission.level","editor"]}
+                }
+            },
+            "commenters":{
+                "$filter":{
+                    "input":"$permissions",
+                    "as":"permission",
+                    "cond":{"$eq":["$$permission.level","commenter"]}
+                }
+            },
+            "viewers":{
+                "$filter":{
+                    "input":"$permissions",
+                    "as":"permission",
+                    "cond":{"$eq":["$$permission.level","viewer"]}
+                }
+            },
+            }
+        }
     ]
 
 def tasks_subtasks_stage():
@@ -337,6 +418,7 @@ def users_populate_stars_stage():
     ]
 
 def tasks_aggregation(id):
+    print(id)
     pipeline = []
     pipeline += match_stage(id)
     pipeline += populate_creator_stage()
@@ -348,6 +430,9 @@ def tasks_aggregation(id):
     pipeline += populate_viewers_stage()
     pipeline += populate_commenters_stage()
     pipeline += populate_editors_stage()
+
+    print("pipeline: //////////////////////")
+    print(pipeline)
     return tasks.aggregate(pipeline=pipeline)
 
 
@@ -362,6 +447,7 @@ def projects_aggregation(id):
     pipeline += populate_viewers_stage()
     pipeline += populate_commenters_stage()
     pipeline += populate_editors_stage()
+
     return projects.aggregate(pipeline=pipeline)
 
 """
@@ -377,146 +463,15 @@ def users_aggregation(id):
 
 
 def discussions_aggregation(id):
-    pipeline = [
-    #populate creator
-        {"$lookup":{
-            "from":"users",
-            "localField":"creator",
-            "foreignField":"_id",
-            "as":"creator"}
-        }, 
-        {
-            "$unwind":"$creator"
-        },
-    #populate assign
-        {"$lookup":{
-            "from":"users",
-            "localField":"assign",
-            "foreignField":"_id",
-            "as":"assign"}
-        },
-        {
-            "$unwind":"$assign"
-        },
-    #get all updates
-        {"$lookup":{
-            "from":"updates",
-            "localField":"_id",
-            "foreignField":"issueId",
-            "as":"updates"}
-        },
-    #filter only comments status and assignee changes
-        {
-            "$project":{
-                '_id':1,
-                'title':1,
-                'location':1,
-                'updated':1,
-                'creator':1,
-                #'subTasks':1, ? relevant
-                #'sources':1, ?relevant
-                'discussions':1,
-                #'permissions':1,
-                'watchers':1,
-                'status':1,
-                'tags':1,
-                'created':1,
-                '__v':1,
-                #'circles':1, ? relevant
-                'assign':1, 
-                'description':1,
-                'due':1,
-                "comments":{
-                    "$filter":{
-                        "input":"$updates",
-                        "as":"update",
-                        "cond":{"$eq":["$$update.type","comment"]}
-                    }
-                },
-                "statusUpdates":{
-                    "$filter":{
-                        "input":"$updates",
-                        "as":"update",
-                        "cond":{"$eq":["$$update.type","updateStatus"]}
-                    }
-                },
-            "assignUpdates":{   
-                "$filter":{
-                    "input":"$updates",
-                    "as":"update",
-                    "cond":{"$or":[
-                        {"$eq":["$$update.type","assignNew"]},
-                        {"$eq":["$$update.type","assign"]},
-                    ]
-                    }
-                } 
-            },
-            #permissions unpopulated
-            "editors":{
-                "$filter":{
-                    "input":"$permissions",
-                    "as":"permission",
-                    "cond":{"$eq":["$$permission.level","editor"]}
-                }
-            },
-            "commenters":{
-                "$filter":{
-                    "input":"$permissions",
-                    "as":"permission",
-                    "cond":{"$eq":["$$permission.level","commenter"]}
-                }
-            },
-            "viewers":{
-                "$filter":{
-                    "input":"$permissions",
-                    "as":"permission",
-                    "cond":{"$eq":["$$permission.level","viewer"]}
-                }
-            },
-            }
-        },
-        #     #subtasks - subDiscussions exist?
-        #     {
-        #         "$graphLookup":{
-        #               "from": "tasks",
-        #          "startWith": "$subTasks",
-        #          "connectFromField": "subTasks",
-        #          "connectToField": "_id",
-        #          "as": "subTasksHierarchy"
-        #         }
-        #     },
-        #watchers
-        {
-            "$lookup":{
-                "from":"users",
-                "localField":"watchers",
-                "foreignField":"_id",
-                "as":"watchers"}
-        },
-        #premissions populate/lookup -viewers
-        {
-            "$lookup":{
-                "from":"users",
-                "localField":"viewers.id",
-                "foreignField":"_id",
-                "as":"viewers"} 
-        },
-        #premissions populate/lookup -commenters
-        {
-            "$lookup":{
-                "from":"users",
-                "localField":"commenters.id",
-                "foreignField":"_id",
-                "as":"commenters"} 
-        },
-        #premissions populate/lookup -editors
-        {
-        "$lookup":{
-            "from":"users",
-            "localField":"editors.id",
-            "foreignField":"_id",
-            "as":"editors"} 
-        },  
-    ]
+    pipeline = []
+    pipeline += match_stage(id)
+    pipeline += populate_creator_stage()
+    pipeline += populate_assign_stage()
+    pipeline += get_updates_stage()
+    pipeline += discussions_filter_stage()
+    pipeline += populate_wachers_stage()
+    pipeline += populate_viewers_stage()
+    pipeline += populate_commenters_stage()
+    pipeline += populate_editors_stage()
     return discussions.aggregate(pipeline=pipeline)
 

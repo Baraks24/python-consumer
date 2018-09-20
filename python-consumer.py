@@ -36,7 +36,7 @@ def get_params_from_message(msg):
             id = key['payload']['_id']   
         return (ops[op],collection,id)
     else:
-        return 'Junk message'
+        return 'junk'
 
 
 
@@ -53,7 +53,8 @@ def main():
         op_collection_userId_tuple = get_params_from_message(msg) 
         print(op_collection_userId_tuple)
         print('\n')
-        opHandler(op_collection_userId_tuple)
+        if(op_collection_userId_tuple!='junk'):   
+            opHandler(op_collection_userId_tuple)
 
 
 if __name__ == "__main__":
