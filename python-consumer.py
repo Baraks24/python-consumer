@@ -3,7 +3,7 @@ import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from op_handler import OpHandler
-from config import DB,MONGO_URI,TOPICS
+from config import DB,MONGO_URI,TOPICS,KAFKA_URL
 
 
 from elasticsearch_wrapper import create_doc,delete_doc,update_doc
@@ -24,6 +24,10 @@ returns tuple (op,collection,Id)
 """
 def get_params_from_message(msg):
     value_payload = msg.value['payload']
+    print("////////////////////msg:////////////////")
+    print(msg)
+    print("////////////////////payload:////////////////")
+    print(value_payload)
     if value_payload:
         op = value_payload['op']
         key = json.loads(msg.key)
@@ -31,7 +35,14 @@ def get_params_from_message(msg):
         collection = topic[(topic.rfind('.')+1):]
         id = None
         if op==UPDATE:
-            id = json.loads(key['payload']['_id'])['_id']['$oid']
+            print(key)
+            #id = json.loads(key['payload']['_id'])['_id']['$oid']#azure version
+            id = json.loads(key['payload']['id'])['$oid']
+            #check if deleted/recycled by root
+            op = DELETE if 'recycled' in json.loads(value_payload['patch'])['$set'].keys() else UPDATE
+            print('updated op///////////////////////////')
+            print(op)
+
         else:
             print(key)
             #id = key['payload']['_id'] #azure version
@@ -50,13 +61,14 @@ def opHandler(op_collection_userId_tuple):
 
 
 def main():
-    consumer = KafkaConsumer(*TOPICS,value_deserializer=lambda m: json.loads(m.decode('utf-8')))
+    consumer = KafkaConsumer(*TOPICS,value_deserializer=lambda m: json.loads(m.decode('utf-8')),bootstrap_servers=[KAFKA_URL])
     for msg in consumer:
-        op_collection_userId_tuple = get_params_from_message(msg) 
-        print(op_collection_userId_tuple)
-        print('\n')
-        if(op_collection_userId_tuple!='junk'):   
-            opHandler(op_collection_userId_tuple)
+        if msg:
+            op_collection_userId_tuple = get_params_from_message(msg) 
+            print(op_collection_userId_tuple)
+            print('\n')
+            if(op_collection_userId_tuple!='junk'):   
+                opHandler(op_collection_userId_tuple)
 
 
 if __name__ == "__main__":

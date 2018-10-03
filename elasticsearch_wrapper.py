@@ -16,15 +16,15 @@ def update_doc(index,doc):
     id = doc["_id"]
     doc.pop("_id")
     #doc["foo"] = "despacito 2"
-    es.update(index=index,id=id,body={"doc":doc},doc_type=index)
+    es.update(index=index,id=id,body={"doc":doc},doc_type=index,ignore=[400, 404,409])
     return
 
 def delete_doc(index,id):
-    es.delete(index=index,id=id,doc_type=index)
+    es.delete(index=index,id=id,doc_type=index,ignore=[400, 404,409])
     return
 
 #create_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo"})
-#update_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo"})
+#update_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo2"})
 #delete_doc(index=TASKS_INDEX,id=456)
 
 #create indices

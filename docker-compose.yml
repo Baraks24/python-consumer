@@ -19,16 +19,16 @@ services:
     container_name: kibana
     ports: ['5601:5601']
     depends_on: ['elasticsearch']
-  mongodb:
-    image: mongo:latest
-    container_name: "mongodb"
-    environment:
-      - MONGO_DATA_DIR=/data/db
-      - MONGO_LOG_DIR=/dev/null
-      - MONGODB_REPLICA_SET_MODE=primary
-    ports:
-      - 27017:27017
-    command: mongod --smallfiles --logpath=/dev/null --replSet=mongo-azure
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: "mongodb"
+  #   environment:
+  #     - MONGO_DATA_DIR=/data/db
+  #     - MONGO_LOG_DIR=/dev/null
+  #     - MONGODB_REPLICA_SET_MODE=primary
+  #   ports:
+  #     - 27017:27017
+  #   command: mongod --smallfiles --logpath=/dev/null --replSet=mongo-azure
   root:
     image: root:latest
     environment: 
@@ -38,7 +38,7 @@ services:
     ports: ['3000:3000']
     command: node server
     depends_on: 
-      - mongodb
+      # - mongodb
       - elasticsearch
   zookeeper:
     image: debezium/zookeeper
@@ -63,10 +63,10 @@ services:
     depends_on: 
       - kafka
       - zookeeper
-      - mongodb
+      # - mongodb
     links:
       - kafka
-      - mongodb
+      # - mongodb
   
 
 
