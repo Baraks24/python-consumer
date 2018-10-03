@@ -33,7 +33,9 @@ def get_params_from_message(msg):
         if op==UPDATE:
             id = json.loads(key['payload']['_id'])['_id']['$oid']
         else:
-            id = key['payload']['_id']   
+            print(key)
+            #id = key['payload']['_id'] #azure version
+            id = json.loads(key['payload']['id'])['$oid']   
         return (ops[op],collection,id)
     else:
         return 'junk'
