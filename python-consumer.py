@@ -24,10 +24,10 @@ returns tuple (op,collection,Id)
 """
 def get_params_from_message(msg):
     value_payload = msg.value['payload']
-    print("////////////////////msg:////////////////")
-    print(msg)
-    print("////////////////////payload:////////////////")
-    print(value_payload)
+    # print("////////////////////msg:////////////////")
+    # print(msg)
+    # print("////////////////////payload:////////////////")
+    # print(value_payload)
     if value_payload:
         op = value_payload['op']
         key = json.loads(msg.key)
@@ -35,16 +35,16 @@ def get_params_from_message(msg):
         collection = topic[(topic.rfind('.')+1):]
         id = None
         if op==UPDATE:
-            print(key)
+            # print(key)
             #id = json.loads(key['payload']['_id'])['_id']['$oid']#azure version
             id = json.loads(key['payload']['id'])['$oid']
             #check if deleted/recycled by root
             op = DELETE if 'recycled' in json.loads(value_payload['patch'])['$set'].keys() else UPDATE
-            print('updated op///////////////////////////')
-            print(op)
+            # print('updated op///////////////////////////')
+            # print(op)
 
         else:
-            print(key)
+            # print(key)
             #id = key['payload']['_id'] #azure version
             id = json.loads(key['payload']['id'])['$oid']   
         return (ops[op],collection,id)
@@ -61,6 +61,7 @@ def opHandler(op_collection_userId_tuple):
 
 
 def main():
+    print('Welcome!')
     consumer = KafkaConsumer(*TOPICS,value_deserializer=lambda m: json.loads(m.decode('utf-8')),bootstrap_servers=[KAFKA_URL])
     for msg in consumer:
         if msg:

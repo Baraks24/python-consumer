@@ -1,6 +1,7 @@
 from elasticsearch import Elasticsearch
 from config import ELASTICSEARCH_HOSTS,USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX
 from JSONSerializer import JSONSerializer
+import json
 
 es = Elasticsearch(ELASTICSEARCH_HOSTS,serializer = JSONSerializer())
 
@@ -22,6 +23,18 @@ def update_doc(index,doc):
 def delete_doc(index,id):
     es.delete(index=index,id=id,doc_type=index,ignore=[400, 404,409])
     return
+
+def search_related_docs(id):
+    body = {
+        "query":{
+            "multi_match":{
+                "query":id
+            }
+        }
+    }
+    res = es.search(index='_all',body=body)
+    hits = [hit['_id'] for hit in res['hits']['hits']]
+    return hits
 
 #create_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo"})
 #update_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo2"})

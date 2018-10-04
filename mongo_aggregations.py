@@ -418,7 +418,7 @@ def users_populate_stars_stage():
     ]
 
 def tasks_aggregation(id):
-    print(id)
+    # print(id)
     pipeline = []
     pipeline += match_stage(id)
     pipeline += populate_creator_stage()
@@ -431,8 +431,8 @@ def tasks_aggregation(id):
     pipeline += populate_commenters_stage()
     pipeline += populate_editors_stage()
 
-    print("pipeline: //////////////////////")
-    print(pipeline)
+    # print("pipeline: //////////////////////")
+    # print(pipeline)
     return tasks.aggregate(pipeline=pipeline)
 
 

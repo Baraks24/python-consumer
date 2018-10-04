@@ -1,7 +1,6 @@
 from mongo_aggregations import projects_aggregation,users_aggregation,discussions_aggregation,tasks_aggregation
-from elasticsearch_wrapper import create_doc,delete_doc,update_doc
+from elasticsearch_wrapper import create_doc,delete_doc,update_doc,search_related_docs
 from config import USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX
-
 
 class OpHandler:
     @staticmethod
@@ -41,8 +40,8 @@ class OpHandler:
         agg_res = tasks_aggregation(id)
         res = list(agg_res)
         #write aggregation to elastic
-        print("res:")
-        print(res)
+        #print("res:")
+        #print(res)
         create_doc(TASKS_INDEX,*res)
         return
 
@@ -52,11 +51,20 @@ class OpHandler:
         res = list(agg_res)
         update_doc(TASKS_INDEX,*res)
         #TODO find all relevant entities and rerun their aggregations
+        #print('search result/////////////////////////////////////////////')
+        #print(search_related_docs(id))
+        print("before es")
+        search_res = search_related_docs(id)
+        
+        print('search result/////////////////////////////')
+        print(search_res)
         return
+
 
     @staticmethod
     def delete_tasks(id):
         #TODO find all relevant entities and rerun their aggregations
+
         delete_doc(TASKS_INDEX,id)
         return
 
@@ -65,8 +73,8 @@ class OpHandler:
         #run aggregation
         agg_res = projects_aggregation(id)
         res = list(agg_res)
-        print("res:")
-        print(res)
+        #print("res:")
+        #print(res)
         #write aggregation to elastic
         create_doc(PROJECTS_INDEX,*res)
         #TODO
@@ -77,8 +85,8 @@ class OpHandler:
         #run aggregation
         agg_res = projects_aggregation(id)
         res = list(agg_res)
-        print("res:")
-        print(res)
+        #print("res:")
+        #print(res)
         #write aggregation to elastic
         update_doc(PROJECTS_INDEX,*res)
         return
@@ -94,7 +102,7 @@ class OpHandler:
         #run aggregation
         agg_res = discussions_aggregation(id)
         res = list(agg_res)
-        print(res)
+        # print(res)
         #write aggregation to elastic
         create_doc(DISCUSSIONS_INDEX,*res)
         return
@@ -103,7 +111,7 @@ class OpHandler:
     def update_discussions(id):
         agg_res = discussions_aggregation(id)
         res = list(agg_res)
-        print(res)
+        # print(res)
         update_doc(DISCUSSIONS_INDEX,*res)
         return
 
@@ -114,7 +122,7 @@ class OpHandler:
 
     @staticmethod
     def create_updates(id):
-        print('Update:')
-        print(id)
+        # print('Update:')
+        # print(id)
         #TODO: Do Something Useful
         return
