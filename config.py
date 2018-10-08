@@ -4,6 +4,10 @@ USERS_INDEX = "users_test"
 PROJECTS_INDEX = "projects_test"
 DISCUSSIONS_INDEX = "discussions_test"
 TASKS_INDEX = "tasks_test"
+UPDATABLE_INDICES=[USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX]
+
+es2mongo = {}
+mongo2es = {}
 
 #Kafka
 KAFKA_URL = "kafka:9092"

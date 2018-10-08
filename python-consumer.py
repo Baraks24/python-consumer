@@ -53,11 +53,16 @@ def get_params_from_message(msg):
 
 
 
-def opHandler(op_collection_userId_tuple):
-    m = globals()['OpHandler']()
-    func_name = "{0}_{1}".format(op_collection_userId_tuple[0].lower(),op_collection_userId_tuple[1].lower())
-    func = getattr(m, func_name)
-    return func(op_collection_userId_tuple[2])
+def opHandler(op_collection_id_tuple):
+    # m = globals()['OpHandler']()
+    # func_name = "{0}_{1}".format(op_collection_id_tuple[0].lower(),op_collection_id_tuple[1].lower())
+    # func = getattr(m, func_name)
+    # return func(op_collection_id_tuple[2])
+    func = OpHandler.execute((op_collection_id_tuple[0].lower(),op_collection_id_tuple[1].lower()))
+    print("1////////////////////")
+    print(func)
+    return func(op_collection_id_tuple[2])
+    
 
 
 def main():

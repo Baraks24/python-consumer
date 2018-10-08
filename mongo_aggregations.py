@@ -3,6 +3,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from functools import reduce
 from config import DB,MONGO_URI
+from config import USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX
+
 
 UPDATE = 'u'
 DELETE = 'd'
@@ -27,6 +29,11 @@ aoa2a = lambda aoa:list(reduce(lambda mem,a:mem+a,aoa,[]))
 
 def match_stage(id):
     return [{"$match":{"_id":ObjectId(id)}}]
+
+#Recieves an array of ids to aggregate
+def match_ids_array(ids):
+    match_array = [{"_id":ObjectId(id)} for id in ids]
+    return [{"$match":{"$or": match_array}}]
 
 def convert_id2string_stage():
     return [{"$addFields":{"_id":{"$convert":{"input": "$_id","to": "string"}}}}]
@@ -231,6 +238,19 @@ def tasks_subtasks_stage():
     }
     ]
 
+def projects_subprojects_stage():
+    return [
+           {
+        "$graphLookup":{
+            "from": "projects",
+            "startWith": "$subProjects",
+            "connectFromField": "subProjects",
+            "connectToField": "_id",
+            "as": "subProjectsHierarchy"
+        }
+    }
+    ]
+
 def populate_wachers_stage():
     return [
           {
@@ -285,6 +305,7 @@ def projects_filter_stage():
             'updated':1,
             'creator':1,
             #'subTasks':1, ? relevant
+            'subProjects':1, #Barak
             #'sources':1, ?relevant
             'discussions':1,
             #'permissions':1,
@@ -417,10 +438,7 @@ def users_populate_stars_stage():
     }
     ]
 
-def tasks_aggregation(id):
-    # print(id)
-    pipeline = []
-    pipeline += match_stage(id)
+def tasks_aggregation_after_match(pipeline):
     pipeline += populate_creator_stage()
     pipeline += populate_assign_stage()
     pipeline += get_updates_stage()
@@ -431,23 +449,51 @@ def tasks_aggregation(id):
     pipeline += populate_commenters_stage()
     pipeline += populate_editors_stage()
 
+
+def tasks_aggregation(id):
+    # print(id)
+    pipeline = []
+    pipeline += match_stage(id)
+    tasks_aggregation_after_match(pipeline)
+    # print("pipeline: //////////////////////")
+    # print(pipeline)
+    return tasks.aggregate(pipeline=pipeline)
+
+#ids- arrays of ids (as string)
+def bulk_tasks_aggregation(ids):
+    # print(id)
+    pipeline = []
+    pipeline += match_ids_array(ids)
+    tasks_aggregation_after_match(pipeline)
     # print("pipeline: //////////////////////")
     # print(pipeline)
     return tasks.aggregate(pipeline=pipeline)
 
 
-def projects_aggregation(id):
-    pipeline = []
-    pipeline += match_stage(id)
+def projects_aggregation_after_match(pipeline):
     pipeline += populate_creator_stage()
     pipeline += populate_assign_stage()
     pipeline += get_updates_stage()
     pipeline += projects_filter_stage()
+    pipeline += projects_subprojects_stage()
     pipeline += populate_wachers_stage()
     pipeline += populate_viewers_stage()
     pipeline += populate_commenters_stage()
     pipeline += populate_editors_stage()
 
+def projects_aggregation(id):
+    pipeline = []
+    pipeline += match_stage(id)
+    projects_aggregation_after_match(pipeline)
+
+    return projects.aggregate(pipeline=pipeline)
+
+def bulk_projects_aggregation(ids):
+    print("bulk_projects_aggregation/////////////////")
+    print(ids)
+    pipeline = []
+    pipeline += match_ids_array(ids)
+    projects_aggregation_after_match(pipeline)
     return projects.aggregate(pipeline=pipeline)
 
 """
@@ -462,9 +508,8 @@ def users_aggregation(id):
     return users.aggregate(pipeline=pipeline)
 
 
-def discussions_aggregation(id):
-    pipeline = []
-    pipeline += match_stage(id)
+
+def discussions_aggregation_after_match(pipeline):
     pipeline += populate_creator_stage()
     pipeline += populate_assign_stage()
     pipeline += get_updates_stage()
@@ -473,5 +518,35 @@ def discussions_aggregation(id):
     pipeline += populate_viewers_stage()
     pipeline += populate_commenters_stage()
     pipeline += populate_editors_stage()
+
+def discussions_aggregation(id):
+    pipeline = []
+    pipeline += match_stage(id)
+    discussions_aggregation_after_match(pipeline)
+
     return discussions.aggregate(pipeline=pipeline)
+
+
+def bulk_discussions_aggregation(ids):
+    pipeline = []
+    pipeline += match_ids_array(ids)
+    discussions_aggregation_after_match(pipeline)
+
+    return discussions.aggregate(pipeline=pipeline)
+
+
+
+
+
+
+
+
+#bulkd_aggregation will bee implemented later will recieve and array of ids from the same collection an perform agg on them
+index2collection = {
+    TASKS_INDEX:{"aggregation":tasks_aggregation,"bulk_aggregation":bulk_tasks_aggregation},
+    DISCUSSIONS_INDEX:{"aggregation":discussions_aggregation,"bulk_aggregation":bulk_discussions_aggregation},
+    PROJECTS_INDEX:{"aggregation":projects_aggregation,"bulk_aggregation":bulk_projects_aggregation},
+    USERS_INDEX:{"aggregation":users_aggregation,"bulk_aggregation":lambda x:x},
+}
+
 
