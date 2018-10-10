@@ -65,16 +65,7 @@ class OpHandler:
         return
 
     @staticmethod
-    def update_tasks(id):
-        # agg_res = tasks_aggregation(id)
-        # res = list(agg_res)
-        # update_doc(TASKS_INDEX,*res)
-        #TODO find all relevant entities and rerun their aggregations
-        #print('search result/////////////////////////////////////////////')
-        #print(search_related_docs(id))
-        # print("before es")
-        update_factory(id,tasks_aggregation,TASKS_INDEX)
-        search_res = search_related_docs(id)
+    def transform_es2bulk(search_res):
         elastic_bulk_update_array=[]
         for ind in UPDATABLE_INDICES:
             ind_ids=[doc['id'] for doc in search_res if doc["index"]==ind]
@@ -83,6 +74,7 @@ class OpHandler:
                 elastic_bulk_update_array.extend([{"id":doc["_id"],"index":ind,"doc":doc} for doc in agg_result])
 
         bulk(elastic_bulk_update_array)
+        return
         
 
         
@@ -94,6 +86,22 @@ class OpHandler:
 
         print('search result/////////////////////////////')
         print(search_res)
+
+    @staticmethod
+    def update_tasks(id):
+        # agg_res = tasks_aggregation(id)
+        # res = list(agg_res)
+        # update_doc(TASKS_INDEX,*res)
+        #TODO find all relevant entities and rerun their aggregations
+        #print('search result/////////////////////////////////////////////')
+        #print(search_related_docs(id))
+        # print("before es")
+        update_factory(id,tasks_aggregation,TASKS_INDEX)
+        search_res = search_related_docs(id)
+        print('search result/////////////////////////////////////////////')
+        print(search_related_docs(id))
+        OpHandler.transform_es2bulk(search_res)
+
         return
 
 
@@ -129,6 +137,7 @@ class OpHandler:
         # update_doc(PROJECTS_INDEX,*res)
         update_factory(id,projects_aggregation,PROJECTS_INDEX)
         search_res = search_related_docs(id)
+        OpHandler.transform_es2bulk(search_res)
         print('search result/////////////////////////////')
         print(search_res)
         return
@@ -159,6 +168,7 @@ class OpHandler:
         # update_doc(DISCUSSIONS_INDEX,*res)
         update_factory(id,discussions_aggregation,DISCUSSIONS_INDEX)
         search_res = search_related_docs(id)
+        OpHandler.transform_es2bulk(search_res)
         print('search result/////////////////////////////')
         print(search_res)
         return

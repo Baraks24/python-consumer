@@ -1,5 +1,6 @@
 #For elasticsearch
 ELASTICSEARCH_HOSTS = ['elasticsearch:9200'] 
+#ELASTICSEARCH_HOSTS=['10.100.11.104:9200']
 USERS_INDEX = "users_test"
 PROJECTS_INDEX = "projects_test"
 DISCUSSIONS_INDEX = "discussions_test"

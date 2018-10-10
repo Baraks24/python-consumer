@@ -80,27 +80,38 @@ def get_updates_stage():
     }
     ]
 
+def get_subTasks_in_project_stage():
+    return [
+            {"$lookup":{
+        "from":"tasks",
+        "localField":"_id",
+        "foreignField":"project",
+        "as":"subTasks"}
+    }
+    ]
+
 def tasks_filter_stage():
     return [
          {
-        "$project":{
-            '_id':1,
-            'title':1,
-            'updated':1,
-            'creator':1,
-            'subTasks':1,
-            'sources':1,
-            'discussions':1,
-            #'permissions':1,
-            'watchers':1,
-            'status':1,
-            'tags':1,
-            'created':1,
-            '__v':1,
-            'circles':1,
-            'assign':1, 
-            'description':1,
-            'due':1,
+        # "$project":{
+        "$addFields":{
+            # '_id':1,
+            # 'title':1,
+            # 'updated':1,
+            # 'creator':1,
+            # 'subTasks':1,
+            # 'sources':1,
+            # 'discussions':1,
+            # #'permissions':1,
+            # 'watchers':1,
+            # 'status':1,
+            # 'tags':1,
+            # 'created':1,
+            # '__v':1,
+            # 'circles':1,
+            # 'assign':1, 
+            # 'description':1,
+            # 'due':1,
             "comments":{
                 "$filter":{
                 "input":"$updates",
@@ -155,25 +166,26 @@ def tasks_filter_stage():
 def discussions_filter_stage():
     return [
         {
-            "$project":{
-                '_id':1,
-                'title':1,
-                'location':1,
-                'updated':1,
-                'creator':1,
-                #'subTasks':1, ? relevant
-                #'sources':1, ?relevant
-                'discussions':1,
-                #'permissions':1,
-                'watchers':1,
-                'status':1,
-                'tags':1,
-                'created':1,
-                '__v':1,
-                #'circles':1, ? relevant
-                'assign':1, 
-                'description':1,
-                'due':1,
+            # "$project":{
+            "$addFields":{
+                # '_id':1,
+                # 'title':1,
+                # 'location':1,
+                # 'updated':1,
+                # 'creator':1,
+                # #'subTasks':1, ? relevant
+                # #'sources':1, ?relevant
+                # 'discussions':1,
+                # #'permissions':1,
+                # 'watchers':1,
+                # 'status':1,
+                # 'tags':1,
+                # 'created':1,
+                # '__v':1,
+                # #'circles':1, ? relevant
+                # 'assign':1, 
+                # 'description':1,
+                # 'due':1,
                 "comments":{
                     "$filter":{
                         "input":"$updates",
@@ -298,26 +310,27 @@ def populate_editors_stage():
 def projects_filter_stage():
     return [
           {
-        "$project":{
-            '_id':1,
-            'title':1,
-            'location':1,
-            'updated':1,
-            'creator':1,
-            #'subTasks':1, ? relevant
-            'subProjects':1, #Barak
-            #'sources':1, ?relevant
-            'discussions':1,
-            #'permissions':1,
-            'watchers':1,
-            'status':1,
-            'tags':1,
-            'created':1,
-            '__v':1,
-            #'circles':1, ? relevant
-            'assign':1, 
-            'description':1,
-            'due':1,
+        # "$project":{
+        "$addFields":{
+            # '_id':1,
+            # 'title':1,
+            # 'location':1,
+            # 'updated':1,
+            # 'creator':1,
+            # 'subTasks':1,
+            # 'subProjects':1, #Barak
+            # #'sources':1, ?relevant
+            # 'discussions':1,
+            # #'permissions':1,
+            # 'watchers':1,
+            # 'status':1,
+            # 'tags':1,
+            # 'created':1,
+            # '__v':1,
+            # #'circles':1, ? relevant
+            # 'assign':1, 
+            # 'description':1,
+            # 'due':1,
             "comments":{
                 "$filter":{
                     "input":"$updates",
@@ -372,22 +385,23 @@ def projects_filter_stage():
 def users_project_stage():
     return [
          {
-        "$project":{
-            "_id":1,
-            "uid": 1,
-            'id':1,
-            'name': 1,
-            'email': 1,
-            'username':1,
-            #'hashed_password':1,
-            #'salt': 1,
-            #'GetMailEveryDayAboutMyTasks': 1,
-            #'GetMailEveryWeekAboutGivenTasks': 1,
-            #'GetMailEveryWeekAboutMyTasks': 1,
-            #'provider': 1,
-            #'roles': 1,
-            #'__v': 1,
-            #'profile':1,
+        # "$project":{
+        "$addFields":{
+            # "_id":1,
+            # "uid": 1,
+            # 'id':1,
+            # 'name': 1,
+            # 'email': 1,
+            # 'username':1,
+            # #'hashed_password':1,
+            # #'salt': 1,
+            # #'GetMailEveryDayAboutMyTasks': 1,
+            # #'GetMailEveryWeekAboutGivenTasks': 1,
+            # #'GetMailEveryWeekAboutMyTasks': 1,
+            # #'provider': 1,
+            # #'roles': 1,
+            # #'__v': 1,
+            # #'profile':1,
             'starredTasks':{
                 "$map":{
                     "input":"$profile.starredTasks",
@@ -438,6 +452,7 @@ def users_populate_stars_stage():
     }
     ]
 
+#Common stages to be done after the match stages in the regular and the bulk versions
 def tasks_aggregation_after_match(pipeline):
     pipeline += populate_creator_stage()
     pipeline += populate_assign_stage()
@@ -474,6 +489,7 @@ def projects_aggregation_after_match(pipeline):
     pipeline += populate_creator_stage()
     pipeline += populate_assign_stage()
     pipeline += get_updates_stage()
+    pipeline += get_subTasks_in_project_stage()
     pipeline += projects_filter_stage()
     pipeline += projects_subprojects_stage()
     pipeline += populate_wachers_stage()

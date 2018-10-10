@@ -43,6 +43,11 @@ def search_related_docs(id):
     # hits = [hit['_id'] for hit in res['hits']['hits']]
     # index = [hit['_index'] for hit in res['hits']['hits']]
     ret = [{"id":hit['_id'],"index":hit['_index']} for hit in res['hits']['hits']]
+    relevant_projects = [{"id":hit['_source']['project'],"index":PROJECTS_INDEX} for hit in res['hits']['hits'] if "project" in hit['_source']]
+    print('relevant projects//////////////////////////////')
+    print(relevant_projects)
+
+    ret.extend(relevant_projects)
     ret = filter_relevant(ret)
     return ret
 
@@ -67,7 +72,7 @@ def bulk(docs):
 
 
 
-# create_doc(index=TASKS_INDEX,doc={"_id":"abc","id":"abc","foo":"foo"})
+#create_doc(index=TASKS_INDEX,doc={"_id":"abc","id":"abc","foo":"foo"})
 #update_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo2"})
 #delete_doc(index=TASKS_INDEX,id=456)
 
