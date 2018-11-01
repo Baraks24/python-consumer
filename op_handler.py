@@ -6,7 +6,7 @@ from config import USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX,UPDA
 
 create_factory = lambda id,aggregation,index: create_doc(index,*(list(aggregation(id))))
 update_factory = lambda id,aggregation,index: update_doc(index,*(list(aggregation(id))))
-delete_factory = lambda id,index: create_doc(index,id)
+delete_factory = lambda id,index: delete_doc(index,id)
 
 class OpHandler:
 

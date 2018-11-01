@@ -1,4 +1,5 @@
 #For elasticsearch
+# ELASTICSEARCH_HOSTS = ['localhost:9200'] 
 ELASTICSEARCH_HOSTS = ['elasticsearch:9200'] 
 #ELASTICSEARCH_HOSTS=['10.100.11.104:9200']
 USERS_INDEX = "users_test"
@@ -23,3 +24,6 @@ TOPICS= [
     'barak.icu-dev.updates',
     'barak.icu-dev.users'
 ]
+
+#Testing
+TESTS_INDEX = "tests"

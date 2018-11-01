@@ -14,20 +14,17 @@ def create_doc(index,doc):
     id = doc["_id"]
     doc.pop("_id")
     doc["id"] = id
-    es.create(index=index,id=id,body=doc,doc_type=index,ignore=[400, 404,409])
-    return
+    return es.create(index=index,id=id,body=doc,doc_type=index,ignore=[400, 404,409])
 
 def update_doc(index,doc):
     id = doc["_id"]
     doc.pop("_id")
     doc["id"] = id
     #doc["foo"] = "despacito 2"
-    es.update(index=index,id=id,body={"doc":doc},doc_type=index,ignore=[400, 404,409])
-    return
+    return es.update(index=index,id=id,body={"doc":doc},doc_type=index,ignore=[400, 404,409])
 
 def delete_doc(index,id):
-    es.delete(index=index,id=id,doc_type=index,ignore=[400, 404,409])
-    return
+    return es.delete(index=index,id=id,doc_type=index,ignore=[400, 404,409])
 
 def search_related_docs(id):
     body = {
@@ -66,11 +63,12 @@ def bulk(docs):
             doc['doc']['id'] = id
     bulk_actions = [{"_id":doc['id'],"_index":doc['index'],"_type":doc['index'],"_source":{'doc':doc['doc']},"_op_type":"update"} for doc in docs]
     try:
-        helpers.bulk(es,bulk_actions,ignore=["400"])
+        return helpers.bulk(es,bulk_actions,ignore=["400"])
     except Exception as inst:
-        print(inst)
+        # print(inst)
+        return inst
 
-
+#TODO: add create index so we can configure the bs we configured manually in kibana
 
 #create_doc(index=TASKS_INDEX,doc={"_id":"abc","id":"abc","foo":"foo"})
 #update_doc(index=TASKS_INDEX,doc={"_id":"456","foo":"foo2"})
