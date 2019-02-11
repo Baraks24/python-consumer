@@ -34,7 +34,7 @@ def search_related_docs(id):
             }
         }
     }
-    res = es.search(index='_all',body=body)
+    res = es.search(index='_all',body=body,request_timeout = 10000)
     print("elastic res")
     print(res)
     # hits = [hit['_id'] for hit in res['hits']['hits']]

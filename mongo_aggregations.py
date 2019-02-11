@@ -524,6 +524,20 @@ def users_aggregation(id):
     return users.aggregate(pipeline=pipeline)
 
 
+def users_aggregation_after_match(pipeline):
+    pipeline += users_project_stage()
+    pipeline += users_populate_stars_stage()
+
+def bulk_users_aggregation(ids):
+    pipeline = []
+    pipeline += match_ids_array(ids)
+    users_aggregation_after_match(pipeline)
+
+    return users.aggregate(pipeline=pipeline)
+
+"""
+Aggregation for discussions
+"""
 
 def discussions_aggregation_after_match(pipeline):
     pipeline += populate_creator_stage()
@@ -562,7 +576,7 @@ index2collection = {
     TASKS_INDEX:{"aggregation":tasks_aggregation,"bulk_aggregation":bulk_tasks_aggregation},
     DISCUSSIONS_INDEX:{"aggregation":discussions_aggregation,"bulk_aggregation":bulk_discussions_aggregation},
     PROJECTS_INDEX:{"aggregation":projects_aggregation,"bulk_aggregation":bulk_projects_aggregation},
-    USERS_INDEX:{"aggregation":users_aggregation,"bulk_aggregation":lambda x:x},
+    USERS_INDEX:{"aggregation":users_aggregation,"bulk_aggregation":bulk_users_aggregation},
 }
 
 

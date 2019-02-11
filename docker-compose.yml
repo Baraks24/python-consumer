@@ -1,49 +1,96 @@
-version: '2.1'
+version: '2'
 
 services:
   python-consumer:
-    image: python-consumer
-    build: .
+    image: rabiran/python-consumer
+    # image: python-consumer
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     ports:
       - 8080:8080
+#    environment:
+#      - GET_HOSTS_FROM=dns
+    depends_on: 
+      - kafka
+      - root
+      - mongodb
+#    labels:
+#      kompose.service.type: NodePort
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
     ports: ['9200:9200']
     container_name: elasticsearch
-    mem_limit: 1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     environment:
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=niggers-yo-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms7g -Xmx7g"
       - "discovery.type=single-node"
+#      - GET_HOSTS_FROM=dns
+#    labels:
+#      kompose.service.type: NodePort
   kibana:
     image: docker.elastic.co/kibana/kibana:6.3.2
     container_name: kibana
     ports: ['5601:5601']
     depends_on: ['elasticsearch']
-  # mongodb:
-  #   image: mongo:latest
-  #   container_name: "mongodb"
-  #   environment:
-  #     - MONGO_DATA_DIR=/data/db
-  #     - MONGO_LOG_DIR=/dev/null
-  #     - MONGODB_REPLICA_SET_MODE=primary
-  #   ports:
-  #     - 27017:27017
-  #   command: mongod --smallfiles --logpath=/dev/null --replSet=mongo-azure
+#    labels:
+#      kompose.service.type: NodePort
+#    environment:
+#      - GET_HOSTS_FROM=dns
+  mongodb:
+    image: mongo:latest
+    # image: mongoreplicaset
+    container_name: "mongodb"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+      - MONGODB_REPLICA_SET_MODE=primary
+#      - GET_HOSTS_FROM=dns
+#    labels:
+#      kompose.service.type: NodePort
+    ports:
+      - 27017:27017
+    command: mongod --smallfiles --logpath=/dev/null --replSet=mongo-azure
+  nightwatch:
+    image: rabiran/nightwatch
+    # image: python-consumer_root
+    # build: ../nightwatch-starter/
+#    environment:
+#      - GET_HOSTS_FROM=dns
+    depends_on:
+      - root
+      - python-consumer
   root:
-    image: root:latest
+    image: rabiran/root
+    # image: python-consumer_root
+    # build:
+    #   context: ../root/
+    #   dockerfile: Dockerfile
     environment: 
       PORT: 3000
       MONGODB_URI: mongodb://mongodb/icu-dev
       ELASTICSEARCH_IP: elasticsearch
+      GET_HOSTS_FROM: dns
     ports: ['3000:3000']
     command: node server
     depends_on: 
-      # - mongodb
+      - mongodb
       - elasticsearch
+#    labels:
+#      kompose.service.type: NodePort
   zookeeper:
     image: debezium/zookeeper
     container_name: zookeeper
     ports: ['2181:2181','2888:2888','3888:3888']
+#    environment:
+#      - GET_HOSTS_FROM=dns
+#    labels:
+#      kompose.service.type: NodePort
   kafka:
     image: debezium/kafka
     container_name: kafka
@@ -52,6 +99,12 @@ services:
       - zookeeper
     environment: 
       - ZOOKEEPER_CONNECT=zookeeper
+#      - GET_HOSTS_FROM=dns
+      - KAFKA_PORT=9092
+#    labels:
+#      kompose.service.type: NodePort
+    links:
+      - zookeeper
   connect:
     image: debezium/connect
     container_name: connect
@@ -60,11 +113,14 @@ services:
       - CONFIG_STORAGE_TOPIC=my-connect-configs
       - OFFSET_STORAGE_TOPIC=my-connect-offsets
       - BOOTSTRAP_SERVERS=kafka:9092
+#      - GET_HOSTS_FROM=dns
     depends_on: 
       - kafka
       - zookeeper
-      # - mongodb
+      - mongodb
     links:
       - kafka
-      # - mongodb
+      - mongodb
+#    labels:
+#      kompose.service.type: NodePort
  

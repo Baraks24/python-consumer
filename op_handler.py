@@ -70,7 +70,17 @@ class OpHandler:
         for ind in UPDATABLE_INDICES:
             ind_ids=[doc['id'] for doc in search_res if doc["index"]==ind]
             if(ind_ids and len(ind_ids)>0):
-                agg_result = index2collection[ind]['bulk_aggregation'](ind_ids)
+                print("//////////debug ind_ids:////////////")
+                print(ind_ids)
+                collection =  index2collection[ind]
+                print("//////////debug collection:////////////")
+                print(collection)
+                bulk_agg = collection['bulk_aggregation']
+                print("//////////debug bulk_agg:////////////")
+                print(bulk_agg)
+                agg_result = bulk_agg(ind_ids)
+                print("//////////debug agg_result:////////////")
+                print(agg_result)
                 elastic_bulk_update_array.extend([{"id":doc["_id"],"index":ind,"doc":doc} for doc in agg_result])
 
         bulk(elastic_bulk_update_array)
