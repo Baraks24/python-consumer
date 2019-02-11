@@ -26,7 +26,6 @@ services:
         soft: -1
         hard: -1
     environment:
-      - cluster.name=niggers-yo-cluster
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms7g -Xmx7g"
       - "discovery.type=single-node"
