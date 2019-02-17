@@ -16,7 +16,8 @@ ADD . /app
 
 # Using pip:
 RUN python3 -m pip install -r requirements.txt
-CMD ["python3", "-m", "python-consumer"]
+# CMD ["python3", "-m", "python-consumer"]
+CMD ["sh","./python-consumer.sh"]
 
 # Using pipenv:
 #RUN python3 -m pip install pipenv

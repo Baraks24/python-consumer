@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml
+    kompose.version: 1.17.0 (a74acad)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: kafka
+  name: kafka
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: kafka
+    spec:
+      containers:
+      - env:
+        - name: ZOOKEEPER_CONNECT
+          value: zookeeper
+        image: debezium/kafka
+        name: kafka
+        ports:
+        - containerPort: 9092
+        resources: {}
+      restartPolicy: Always
+status: {}

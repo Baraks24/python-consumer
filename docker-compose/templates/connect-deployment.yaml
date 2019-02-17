@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml
+    kompose.version: 1.17.0 (a74acad)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: connect
+  name: connect
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: connect
+    spec:
+      containers:
+      - env:
+        - name: BOOTSTRAP_SERVERS
+          value: kafka:9092
+        - name: CONFIG_STORAGE_TOPIC
+          value: my-connect-configs
+        - name: OFFSET_STORAGE_TOPIC
+          value: my-connect-offsets
+        image: debezium/connect
+        name: connect
+        ports:
+        - containerPort: 8083
+        resources: {}
+      restartPolicy: Always
+status: {}

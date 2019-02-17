@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml
+    kompose.version: 1.17.0 (a74acad)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: root
+  name: root
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: root
+    spec:
+      containers:
+      - args:
+        - node
+        - server
+        env:
+        - name: ELASTICSEARCH_IP
+          value: elasticsearch
+        - name: MONGODB_URI
+          value: mongodb://mongodb/icu-dev
+        - name: PORT
+          value: "3000"
+        image: root
+        name: root
+        ports:
+        - containerPort: 3000
+        resources: {}
+      restartPolicy: Always
+status: {}
