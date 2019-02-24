@@ -4,4 +4,4 @@ bin/kafka-server-start.sh config/server.properties
 
 bin/connect-distributed.sh config/connect-distributed.properties
 
-curl -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' http://localhost:8083/connectors -d @config/debezium-config.properties
+curl -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' http://localhost:8083/connectors -d @debezium-config.properties

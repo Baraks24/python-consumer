@@ -21,7 +21,7 @@ def update_doc(index,doc):
     doc.pop("_id")
     doc["id"] = id
     #doc["foo"] = "despacito 2"
-    return es.update(index=index,id=id,body={"doc":doc},doc_type=index,ignore=[400, 404,409])
+    return es.update(index=index,id=id,body={"doc":doc,"doc_as_upsert":True},doc_type=index,ignore=[400, 404,409])
 
 def delete_doc(index,id):
     return es.delete(index=index,id=id,doc_type=index,ignore=[400, 404,409])

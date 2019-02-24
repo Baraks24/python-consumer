@@ -195,3 +195,10 @@ class OpHandler:
         # print(id)
         #TODO: Do Something Useful
         return
+    
+    @staticmethod
+    def update_updates(id):
+        # print('Update:')
+        # print(id)
+        #TODO: Do Something Useful
+        return
