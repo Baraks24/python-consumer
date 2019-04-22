@@ -95,13 +95,13 @@ def fix(e):
 def main():
     # counter = 0
     print('Welcome!')
-    consumer = KafkaConsumer(*TOPICS,value_deserializer=lambda m: json.loads(m.decode('utf-8')),bootstrap_servers=[KAFKA_URL], group_id='my_favorite_group',auto_offset_reset='earliest',enable_auto_commit=False)
+    consumer = KafkaConsumer(*TOPICS,value_deserializer=lambda m: json.loads(m.decode('utf-8')) if m is not None else False,bootstrap_servers=[KAFKA_URL], group_id='my_favorite_group',auto_offset_reset='earliest',enable_auto_commit=False)
     for msg in consumer:
         print("this is a message yo, read the message:")
         print(msg)
         # TODO:
         #serialize message
-        if msg:
+        if msg and msg.value:
             op_collection_userId_tuple = get_params_from_message(msg) 
             print(op_collection_userId_tuple)
             print('\n')
