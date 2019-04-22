@@ -4,9 +4,18 @@ from config import USERS_INDEX,PROJECTS_INDEX,DISCUSSIONS_INDEX,TASKS_INDEX,UPDA
 
 
 
-create_factory = lambda id,aggregation,index: create_doc(index,*(list(aggregation(id))))
-update_factory = lambda id,aggregation,index: update_doc(index,*(list(aggregation(id))))
+#create_factory = lambda id,aggregation,index: create_doc(index,*(list(aggregation(id))))
+#update_factory = lambda id,aggregation,index: update_doc(index,*(list(aggregation(id))))
 delete_factory = lambda id,index: delete_doc(index,id)
+
+def create_factory(id,aggregation,index):
+    agg_res = list(aggregation(id))
+    if len(agg_res)>0:
+        create_doc(index,*agg_res)
+def update_factory(id,aggregation,index):
+    agg_res = list(aggregation(id))
+    if len(agg_res)>0:
+        update_doc(index,*agg_res)
 
 class OpHandler:
 
