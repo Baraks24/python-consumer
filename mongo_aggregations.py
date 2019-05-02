@@ -75,7 +75,7 @@ def get_updates_stage():
             {"$lookup":{
         "from":"updates",
         "localField":"_id",
-        "foreignField":"issueId",
+        "foreignField":"entity",
         "as":"updates"}
     }
     ]
@@ -116,14 +116,14 @@ def tasks_filter_stage():
                 "$filter":{
                 "input":"$updates",
                 "as":"update",
-                "cond":{"$eq":["$$update.type","comment"]}
+                "cond":{"$eq":["$$update.updateField","comment"]}
                 }
             },
             "statusUpdates":{
                 "$filter":{
                     "input":"$updates",
                     "as":"update",
-                    "cond":{"$eq":["$$update.type","updateStatus"]}
+                    "cond":{"$eq":["$$update.updateField","status"]}
                 }
             },
             "assignUpdates":{   
@@ -131,8 +131,8 @@ def tasks_filter_stage():
                     "input":"$updates",
                     "as":"update",
                     "cond":{"$or":[
-                        {"$eq":["$$update.type","assignNew"]},
-                        {"$eq":["$$update.type","assign"]},
+                        {"$eq":["$$update.updateField","assignNew"]},
+                        {"$eq":["$$update.updateField","assign"]},
                         ]
                     }
                 } 
@@ -190,14 +190,14 @@ def discussions_filter_stage():
                     "$filter":{
                         "input":"$updates",
                         "as":"update",
-                        "cond":{"$eq":["$$update.type","comment"]}
+                        "cond":{"$eq":["$$update.updateField","comment"]}
                     }
                 },
                 "statusUpdates":{
                     "$filter":{
                         "input":"$updates",
                         "as":"update",
-                        "cond":{"$eq":["$$update.type","updateStatus"]}
+                        "cond":{"$eq":["$$update.updateField","status"]}
                     }
                 },
             "assignUpdates":{   
@@ -205,8 +205,8 @@ def discussions_filter_stage():
                     "input":"$updates",
                     "as":"update",
                     "cond":{"$or":[
-                        {"$eq":["$$update.type","assignNew"]},
-                        {"$eq":["$$update.type","assign"]},
+                        {"$eq":["$$update.updateField","assignNew"]},
+                        {"$eq":["$$update.updateField","assign"]},
                     ]
                     }
                 } 
@@ -335,14 +335,14 @@ def projects_filter_stage():
                 "$filter":{
                     "input":"$updates",
                     "as":"update",
-                    "cond":{"$eq":["$$update.type","comment"]}
+                    "cond":{"$eq":["$$update.updateField","comment"]}
                 }
             },
             "statusUpdates":{
                 "$filter":{
                     "input":"$updates",
                     "as":"update",
-                    "cond":{"$eq":["$$update.type","updateStatus"]}
+                    "cond":{"$eq":["$$update.updateField","status"]}
                 }
             },
             "assignUpdates":{   
@@ -350,8 +350,8 @@ def projects_filter_stage():
                     "input":"$updates",
                     "as":"update",
                     "cond":{"$or":[
-                        {"$eq":["$$update.type","assignNew"]},
-                        {"$eq":["$$update.type","assign"]},
+                        {"$eq":["$$update.updateField","assignNew"]},
+                        {"$eq":["$$update.updateField","assign"]},
                         ]
                     }
                 } 
